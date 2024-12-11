@@ -1,5 +1,23 @@
 const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
+
+async function connect() {
+    try {
+        await mongoose.connect(
+            'mongodb+srv://ibrahimallae1:Chocolat93@projet6.ek0u3.mongodb.net/projet6?retryWrites=true&w=majority',
+            { appName: 'projet6' } // Option pour l'application
+        );
+        console.log('Connexion à MongoDB réussie !');
+    } catch (error) {
+        console.error('Connexion à MongoDB échouée !', error);
+    }
+}
+
+connect();
+
+
+    
 
 // Middleware pour permettre les CORS (Cross-Origin Resource Sharing)
 app.use((req, res, next) => {
