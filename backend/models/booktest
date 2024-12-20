@@ -1,0 +1,20 @@
+const booktest = [
+    {
+    userId: "1", // Ensure userId is included
+    title: "titrrrre",
+    author: "test",
+    imageUrl: 
+    "https://picsum.photos/200",
+    year: 1954,
+    genre: "fantasy",
+    ratings: [
+      {
+        userId: "1",
+        grade: 5
+      }
+    ],
+    averageRating: 5
+  }];
+  
+  module.exports = { booktest };
+  
