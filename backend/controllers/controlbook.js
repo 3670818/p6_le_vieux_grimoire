@@ -14,14 +14,10 @@ exports.createBook = async (req, res, next) => {
 }
 
 
-
-
 exports.getbook = (req, res) => {
   res.send(booktest);
   console.log(booktest)
 }
-
-
 
 // Update an existing book
 exports.modifyBook = (req, res, next) => {
@@ -52,22 +48,58 @@ exports.deleteBook = (req, res, next) => {
 };
 
 
-// Add rating to book and recalculate average rating
-exports.addRating = (req, res, next) => {
-    Book.findOne({ _id: req.params.id })
-        .then((book) => {
-            if (!book.ratings.some(rating => rating.userId === req.body.userId)) {
-                book.ratings.push({ userId: req.body.userId, grade: req.body.rating });
-                book.averageRating = parseFloat((book.ratings.reduce((a, b) => a + b.grade, 0) / book.ratings.length).toFixed(1));
+exports.addRating = async (req, res, next) => {
+  try {
+      const book = await Book.findOne({ _id: req.params.id });
 
-                Book.findOneAndUpdate({ _id: req.params.id }, { $push: { ratings: { userId: req.body.userId, grade: req.body.rating } }, $set: { averageRating: book.averageRating } }, {new: true})
-                    .then((bookModified) => res.status(200).json(bookModified))
-                    .catch(error => res.status(400).json({ error }));
-            }
-            else res.status(401).json({ message: 'Vous avez déjà publié une note !' });
-        })
-        .catch(error => res.status(400).json({ error }));
-}
+      if (!book) {
+          return res.status(404).json({ message: 'Book not found' });
+      }
+
+      const existingRating = book.ratings.find(rating => rating.userId === req.body.userId);
+
+      if (existingRating) {
+          return res.status(401).json({ message: 'Vous avez déjà publié une note !' });
+      }
+
+      book.ratings.push({ userId: req.body.userId, grade: req.body.rating });
+      book.averageRating = parseFloat((book.ratings.reduce((a, b) => a + b.grade, 0) / book.ratings.length).toFixed(1));
+
+      const bookModified = await Book.findOneAndUpdate(
+          { _id: req.params.id },
+          { $push: { ratings: { userId: req.body.userId, grade: req.body.rating } }, $set: { averageRating: book.averageRating } },
+          { new: true }
+      );
+
+      res.status(200).json(bookModified);
+  } catch (error) {
+      res.status(400).json({ error: error.message });
+  }
+};
+
+
+
+
+
+
+exports.BestRating = async (req, res, next) => {
+  try {
+      // Find the book with the best rating
+      const bestRatedBook = await Book.find().sort({ rating: -1 }).limit(3);
+      
+
+      if (!bestRatedBook) {
+          return res.status(404).json({ message: 'No books found' });
+      }
+
+      res.status(200).json(bestRatedBook);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+  
+};
+
+
 
 
 

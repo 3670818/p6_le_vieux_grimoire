@@ -1,12 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
 const bookrouter = require('./routes/bookrouter');
 const userrouter = require('./routes/userrouter');
+const path = require('path')
+require('dotenv').config(); // Assurez-vous d'utiliser dotenv pour les informations sensibles
 const multer = require('multer');
 
 // require('dotenv').config(); // Assurez-vous d'utiliser dotenv pour les informations sensibles
 const app = express();
+
 
 // Connectez-vous à MongoDB
 async function connect() {
@@ -32,8 +34,14 @@ app.use((req, res, next) => {
 // Middleware JSON
 app.use(express.json());
 //Routes
+
+
+
+app.use('/uploads/', express.static('uploads'));
 app.use('/api/books', bookrouter);
 app.use('/api/auth', userrouter);
 
 
+
 module.exports = app;
+
