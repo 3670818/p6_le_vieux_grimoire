@@ -1,9 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-// require('dotenv').config(); // Assurez-vous d'utiliser dotenv pour les informations sensibles
-const app = express();
+
 const bookrouter = require('./routes/bookrouter');
 const userrouter = require('./routes/userrouter');
+const multer = require('multer');
+
+// require('dotenv').config(); // Assurez-vous d'utiliser dotenv pour les informations sensibles
+const app = express();
 
 // Connectez-vous à MongoDB
 async function connect() {
@@ -17,8 +20,8 @@ async function connect() {
     }
 }
 
-connect();
 
+connect();
 // Middleware pour permettre les CORS (Cross-Origin Resource Sharing)
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

@@ -2,64 +2,24 @@ const Book = require('../models/Book'); // Assume this is your Book model
 const {booktest }= require('../models/booktest');
 
 
-
-
-exports.getbook = (req, res) => {
-    res.send(booktest);
-    console.log(booktest)
+exports.createBook = async (req, res, next) => {
+    const bookObject = JSON.parse(req.body.book);
+    const book = new Book({
+        ...bookObject,
+        imageUrl: `${req.protocol}://${req.get('host')}/${req.file.path}`
+    });
+    book.save()
+        .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
+        .catch(error => res.status(400).json({error}));
 }
 
 
-exports.createBook = (req, res, next) => {
-  try {
-    // Parse the book object from the request body
-    const bookObject = JSON.parse(req.body.book);
-
-    const { title, author, year, genre, userId, ratings, averageRating } = bookObject;
-
-    // Validate request body
-    if (!userId || !title || !author || !year || !genre || !ratings || !averageRating) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    const book = new Book({
-      userId,
-      title,
-      author,
-      year,
-      genre,
-      ratings,
-      averageRating,
-      imageUrl: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`
-    });
-
-    book.save()
-      .then(() => res.status(201).json({ message: 'Objet enregistré !' }))
-      .catch(error => {
-        console.error('Error saving book:', error);
-        res.status(400).json({ error: 'Error saving book' });
-      });
-  } catch (error) {
-    console.error('Error parsing request body:', error);
-    res.status(400).json({ error: 'Invalid request body' });
-  }
-};
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+exports.getbook = (req, res) => {
+  res.send(booktest);
+  console.log(booktest)
+}
 
 
 
