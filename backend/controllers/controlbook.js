@@ -2,11 +2,12 @@ const Book = require('../models/Book'); // Assume this is your Book model
 const {booktest }= require('../models/booktest');
 
 
+
 exports.createBook = async (req, res, next) => {
     const bookObject = JSON.parse(req.body.book);
     const book = new Book({
         ...bookObject,
-        imageUrl: `${req.protocol}://${req.get('host')}/${req.file.path}`
+          imageUrl: `${req.file.filename}`
     });
     book.save()
         .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
@@ -26,19 +27,53 @@ exports.modifyBook = (req, res, next) => {
         .catch(error => res.status(400).json({ error }));
 };
 
-// Get a specific book by ID
-exports.getOneBook = (req, res, next) => {
-    Book.findOne({ _id: req.params.id })
-        .then(book => res.status(200).json(book))
-        .catch(error => res.status(404).json({ error }));
+
+
+exports.getOneBook = async (req, res, next) => {
+    try {
+        const book = await Book.findOne({ _id: req.params.id });
+
+        if (!book) {
+            return res.status(404).json({ message: 'Book not found' });
+        }
+
+        // Assurez-vous que l'URL de l'image est correctement formée
+        book.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${book.imageUrl}`;
+
+        res.status(200).json(book);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 };
 
+
+
 // Get all books
-exports.getAllBooks = (req, res, next) => {
-    Book.find()
-        .then(books => res.status(200).json(books))
-        .catch(error => res.status(400).json({ error }));
+
+
+// Fonction pour générer l'URL de l'image
+const generateImageUrl = (req, filename) => {
+    return `${req.protocol}://${req.get('host')}/uploads/${filename}`;
 };
+
+exports.getAllBooks = async (req, res, next) => {
+    try {
+        const books = await Book.find();
+
+        // Modifier l'URL de l'image pour chaque livre
+        const booksWithImageUrls = books.map(book => {
+            return {
+                ...book._doc,
+                imageUrl: generateImageUrl(req, book.imageUrl)
+            };
+        });
+
+        res.status(200).json(booksWithImageUrls);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 
 // Delete a book
 exports.deleteBook = (req, res, next) => {
