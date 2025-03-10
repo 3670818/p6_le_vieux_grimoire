@@ -10,15 +10,12 @@ exports.createBook = async (req, res, next) => {
           imageUrl: `${req.file.filename}`
     });
     book.save()
-        .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
+        .then(() => res.status(201).json({ message: 'Book enregistré !'}))
         .catch(error => res.status(400).json({error}));
 }
 
 
-exports.getbook = (req, res) => {
-  res.send(booktest);
-  console.log(booktest)
-}
+
 
 // Update an existing book
 exports.modifyBook = (req, res, next) => {
@@ -117,21 +114,33 @@ exports.addRating = async (req, res, next) => {
 
 
 
+
+// Fonction pour générer l'URL de l'image
+const generateImage = (req, filename) => {
+    return `${req.protocol}://${req.get('host')}/uploads/${filename}`;
+};
+
 exports.BestRating = async (req, res, next) => {
-  try {
-      // Find the book with the best rating
-      const bestRatedBook = await Book.find().sort({ rating: -1 }).limit(3);
-      
+    try {
+        // Find the books with the best ratings
+        const bestRatedBooks = await Book.find().sort({ averageRating: -1 }).limit(3);
 
-      if (!bestRatedBook) {
-          return res.status(404).json({ message: 'No books found' });
-      }
+        if (!bestRatedBooks || bestRatedBooks.length === 0) {
+            return res.status(404).json({ message: 'No books found' });
+        }
 
-      res.status(200).json(bestRatedBook);
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-  
+        // Modify the image URL for each book
+        const booksWithImageUrls = bestRatedBooks.map(book => {
+            return {
+                ...book._doc,
+                imageUrl: generateImage(req, book.imageUrl)
+            };
+        });
+
+        res.status(200).json(booksWithImageUrls);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 
 
