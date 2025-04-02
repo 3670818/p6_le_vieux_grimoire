@@ -1,5 +1,43 @@
 const Book = require('../models/Book'); // Assume this is your Book model
 const {booktest }= require('../models/booktest');
+const fs = require('fs');
+const path = require('path');
+
+// // Delete a book
+// exports.deleteBook = (req, res, next) => {
+//     Book.deleteOne({ _id: req.params.id })
+//         .then(() => res.status(200).json({ message: 'Book deleted!' }))
+//         .catch(error => res.status(400).json({ error }));
+// };
+
+
+
+
+exports.deleteBook = (req, res, next) => {
+    Book.findOne({ _id: req.params.id })
+        .then(book => {
+            if (!book) {
+                return res.status(404).json({ message: 'Book not found' });
+            }
+
+            // Récupérer le chemin du fichier image
+            const imagePath = path.join(__dirname, '../uploads', book.imageUrl);
+
+            // Supprimer le fichier image
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    console.error('Erreur lors de la suppression de l\'image:', err);
+                }
+
+                // Supprimer le livre de la base de données
+                Book.deleteOne({ _id: req.params.id })
+                    .then(() => res.status(200).json({ message: 'Book deleted!' }))
+                    .catch(error => res.status(400).json({ error }));
+            });
+        })
+        .catch(error => res.status(500).json({ error }));
+};
+
 
 
 
@@ -72,12 +110,6 @@ exports.getAllBooks = async (req, res, next) => {
 };
 
 
-// Delete a book
-exports.deleteBook = (req, res, next) => {
-    Book.deleteOne({ _id: req.params.id })
-        .then(() => res.status(200).json({ message: 'Book deleted!' }))
-        .catch(error => res.status(400).json({ error }));
-};
 
 
 exports.addRating = async (req, res, next) => {

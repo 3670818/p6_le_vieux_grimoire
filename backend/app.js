@@ -6,7 +6,7 @@ const path = require('path')
 require('dotenv').config(); // Assurez-vous d'utiliser dotenv pour les informations sensibles
 const multer = require('multer');
 
-// require('dotenv').config(); // Assurez-vous d'utiliser dotenv pour les informations sensibles
+//  require('dotenv').config(); // Assurez-vous d'utiliser dotenv pour les informations sensibles
 const app = express();
 
 
