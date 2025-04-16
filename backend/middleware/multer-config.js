@@ -4,9 +4,6 @@
 // const fs = require('fs');
 
 
-
-
-
 // // Configuration de multer pour le stockage des fichiers
 // const storage = multer.diskStorage({
 //   destination: (req, file, cb) => {
@@ -35,6 +32,88 @@
 //     .toFile(filePath, (err, info) => {
 //       if (err) {
 //         return next(err);
+//       }
+//       next();
+//     });
+// };const multer = require('multer');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const sharp = require('sharp');
+// const fs = require('fs');
+// const path = require('path');
+
+// // Utiliser la mémoire (pas de fichier temporaire sur disque)
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage });
+
+// const resizeAndConvertToWebP = async (req, res, next) => {
+//   if (!req.file) return next();
+
+//   try {
+//     const uploadDir = path.join(__dirname, '..', 'uploads');
+//     if (!fs.existsSync(uploadDir)) {
+//       fs.mkdirSync(uploadDir);
+//     }
+
+//     const timestamp = Date.now();
+//     const originalName = req.file.originalname.replace(/\s+/g, '-'); // sécurité : pas d'espaces
+//     const filename = `${timestamp}-${originalName}.webp`;
+//     const filepath = path.join(uploadDir, filename);
+
+//     await sharp(req.file.buffer)
+//       .resize(800, 800, { fit: 'inside' }) // adapte à 800px max
+//       .webp({ quality: 80 })
+//       .toFile(filepath);
+
+//     // Ajouter info à req pour qu'on puisse l'utiliser après
+//     req.file.filename = filename;
+//     req.file.path = filepath;
+
+//     next();
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+// module.exports = { upload, resizeAndConvertToWebP };
+
+
+
+
 //       }
 //       next();
 //     });
@@ -91,15 +170,6 @@ const resizeAndConvertToWebP = async (req, res, next) => {
 };
 
 module.exports = { upload, resizeAndConvertToWebP };
-
-
-
-
-
-
-
-
-
 
 
 

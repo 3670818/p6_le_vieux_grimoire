@@ -15,28 +15,28 @@ const path = require('path');
 
 exports.deleteBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
-        .then(book => {
-            if (!book) {
-                return res.status(404).json({ message: 'Book not found' });
-            }
-
-            // Récupérer le chemin du fichier image
-            const imagePath = path.join(__dirname, '../uploads', book.imageUrl);
-
-            // Supprimer le fichier image
-            fs.unlink(imagePath, (err) => {
-                if (err) {
-                    console.error('Erreur lors de la suppression de l\'image:', err);
-                }
-
-                // Supprimer le livre de la base de données
-                Book.deleteOne({ _id: req.params.id })
-                    .then(() => res.status(200).json({ message: 'Book deleted!' }))
-                    .catch(error => res.status(400).json({ error }));
-            });
-        })
-        .catch(error => res.status(500).json({ error }));
-};
+      .then(book => {
+        if (!book) {
+          return res.status(404).json({ message: 'Book not found' });
+        }
+  
+        const filename = book.imageUrl.split('/').pop();
+        const imagePath = path.join(__dirname, '../uploads', filename);
+  
+        fs.unlink(imagePath, (err) => {
+          if (err) {
+            console.error("Erreur lors de la suppression de l'image:", err);
+          }
+  
+          // Supprimer le livre de la base de données
+          Book.deleteOne({ _id: req.params.id })
+            .then(() => res.status(200).json({ message: 'Book deleted!' }))
+            .catch(error => res.status(500).json({ error }));
+        });
+      })
+      .catch(error => res.status(500).json({ error }));
+  };
+  
 
 
 
@@ -49,7 +49,7 @@ exports.createBook = async (req, res, next) => {
     });
     book.save()
         .then(() => res.status(201).json({ message: 'Book enregistré !'}))
-        .catch(error => res.status(400).json({error}));
+        .catch(error => res.status(402).json({error}));
 }
 
 
@@ -59,7 +59,7 @@ exports.createBook = async (req, res, next) => {
 exports.modifyBook = (req, res, next) => {
     Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
         .then(() => res.status(200).json({ message: 'Book updated!' }))
-        .catch(error => res.status(400).json({ error }));
+        .catch(error => res.status(403).json({ error }));
 };
 
 
@@ -77,7 +77,7 @@ exports.getOneBook = async (req, res, next) => {
 
         res.status(200).json(book);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(404).json({ error: error.message });
     }
 };
 
@@ -105,7 +105,7 @@ exports.getAllBooks = async (req, res, next) => {
 
         res.status(200).json(booksWithImageUrls);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(405).json({ error: error.message });
     }
 };
 
@@ -137,7 +137,7 @@ exports.addRating = async (req, res, next) => {
 
       res.status(200).json(bookModified);
   } catch (error) {
-      res.status(400).json({ error: error.message });
+      res.status(406).json({ error: error.message });
   }
 };
 

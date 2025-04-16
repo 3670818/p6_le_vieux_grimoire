@@ -31,7 +31,7 @@ exports.login = (req, res, next) => {
                     const token = jwt.sign(
                         { userId: user._id }, // Le payload contient l'ID de l'utilisateur
                         process.env.JWT_SECRET, // Utilise une clé secrète stockée dans ton fichier .env
-                        { expiresIn: "2h" } // La durée d'expiration du token
+                        // { expiresIn: "2h" } // La durée d'expiration du token
                     );
 
                     res.status(200).json({

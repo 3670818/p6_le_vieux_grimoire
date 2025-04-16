@@ -5,6 +5,7 @@ const userrouter = require('./routes/userrouter');
 const path = require('path')
 require('dotenv').config(); // Assurez-vous d'utiliser dotenv pour les informations sensibles
 const multer = require('multer');
+const { upload, resizeAndConvertToWebP } = require('./middleware/multer-config');
 
 //  require('dotenv').config(); // Assurez-vous d'utiliser dotenv pour les informations sensibles
 const app = express();
