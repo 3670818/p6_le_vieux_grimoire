@@ -1,7 +1,7 @@
 const express = require('express');
 const bookrouter = express.Router();
 const controlbook = require('../controllers/controlbook');
-const { upload } = require('../middleware/multer-config');
+const { upload ,resizeAndConvertToWebP} = require('../middleware/multer-config');
 const storage = require('../middleware/multer-config');
 const authMiddleware = require("../middleware/auth");
 // const authMiddleware = require('../middleware/auth');
@@ -11,7 +11,8 @@ const authMiddleware = require("../middleware/auth");
 //  bookrouter.post('/', upload.single('image'), controlbook.createBook);
 
 bookrouter.get('/bestrating',controlbook.BestRating);
-bookrouter.post('/', upload.single("image"), controlbook.createBook);
+bookrouter.post('/', upload.single('image'), resizeAndConvertToWebP, controlbook.createBook);
+
 bookrouter.get('/:id', controlbook.getOneBook);
 bookrouter.put('/:id', authMiddleware,controlbook.modifyBook)
 bookrouter.get('/', controlbook.getAllBooks);

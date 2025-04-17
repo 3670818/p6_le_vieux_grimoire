@@ -39,6 +39,8 @@ app.use(express.json());
 
 
 app.use('/uploads/', express.static('uploads'));
+//app.use('/images', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/api/books', bookrouter);
 app.use('/api/auth', userrouter);
 

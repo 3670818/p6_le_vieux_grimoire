@@ -45,7 +45,7 @@ exports.createBook = async (req, res, next) => {
     const bookObject = JSON.parse(req.body.book);
     const book = new Book({
         ...bookObject,
-          imageUrl: `${req.file.filename}`
+          imageUrl:  `${req.file.filename}`
     });
     book.save()
         .then(() => res.status(201).json({ message: 'Book enregistré !'}))
