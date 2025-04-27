@@ -12,54 +12,83 @@ const path = require('path');
 
 
 
-
 exports.deleteBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
-      .then(book => {
-        if (!book) {
-          return res.status(404).json({ message: 'Book not found' });
-        }
-  
-        const filename = book.imageUrl.split('/').pop();
-        const imagePath = path.join(__dirname, '../uploads', filename);
-  
-        fs.unlink(imagePath, (err) => {
-          if (err) {
-            console.error("Erreur lors de la suppression de l'image:", err);
-          }
-  
-          // Supprimer le livre de la base de données
-          Book.deleteOne({ _id: req.params.id })
-            .then(() => res.status(200).json({ message: 'Book deleted!' }))
-            .catch(error => res.status(500).json({ error }));
-        });
-      })
-      .catch(error => res.status(500).json({ error }));
-  };
-  
+        .then(book => {
+            if (!book) {
+                return res.status(404).json({ message: 'Book not found' });
+            }
+
+            // 🛡 Vérification de l'autorisation
+            if (book.userId !== req.user.userId) {
+                return res.status(403).json({ message: 'Unauthorized to delete this book' });
+            }
+
+            // Récupérer le chemin du fichier image
+            const imagePath = path.join(__dirname, '../uploads', book.imageUrl);
+
+            // Supprimer le fichier image
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    console.error('Erreur lors de la suppression de l\'image:', err);
+                }
+
+                // Supprimer le livre de la base de données
+                Book.deleteOne({ _id: req.params.id })
+                    .then(() => res.status(200).json({ message: 'Book deleted!' }))
+                    .catch(error => res.status(400).json({ error }));
+            });
+        })
+        .catch(error => res.status(500).json({ error }));
+};
+
+
 
 
 
 
 exports.createBook = async (req, res, next) => {
-    const bookObject = JSON.parse(req.body.book);
-    const book = new Book({
-        ...bookObject,
-          imageUrl:  `${req.file.filename}`
-    });
-    book.save()
-        .then(() => res.status(201).json({ message: 'Book enregistré !'}))
-        .catch(error => res.status(402).json({error}));
-}
+    try {
+        // Vérifie si req.body.book existe et est un JSON valide
+        if (!req.body.book) {
+            return res.status(400).json({ message: 'Aucun livre à enregistrer. Les données sont manquantes.' });
+        }
+
+        const bookObject = JSON.parse(req.body.book); // Convertir en objet si nécessaire
+        const book = new Book({
+            ...bookObject, // Déstructure les données de l'objet book
+            imageUrl: `${req.file.filename}`  // L'URL de l'image est générée après le téléchargement du fichier
+        });
+
+        await book.save(); // Sauvegarde le livre dans la base de données
+        res.status(201).json({ message: 'Livre enregistré !' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
 
 
 
-// Update an existing book
+
 exports.modifyBook = (req, res, next) => {
-    Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-        .then(() => res.status(200).json({ message: 'Book updated!' }))
-        .catch(error => res.status(403).json({ error }));
+    Book.findOne({ _id: req.params.id })
+        .then(book => {
+            if (!book) {
+                return res.status(404).json({ message: 'Book not found' });
+            }
+
+            // 🛡 Vérification de l'autorisation
+            if (book.userId !== req.user.userId) {
+                return res.status(403).json({ message: 'Unauthorized to modify this book' });
+            }
+
+            // Mise à jour du livre
+            Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
+                .then(() => res.status(200).json({ message: 'Book updated!' }))
+                .catch(error => res.status(400).json({ error }));
+        })
+        .catch(error => res.status(500).json({ error }));
 };
 
 
@@ -77,7 +106,7 @@ exports.getOneBook = async (req, res, next) => {
 
         res.status(200).json(book);
     } catch (error) {
-        res.status(404).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 };
 
@@ -105,7 +134,7 @@ exports.getAllBooks = async (req, res, next) => {
 
         res.status(200).json(booksWithImageUrls);
     } catch (error) {
-        res.status(405).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 };
 
@@ -137,7 +166,7 @@ exports.addRating = async (req, res, next) => {
 
       res.status(200).json(bookModified);
   } catch (error) {
-      res.status(406).json({ error: error.message });
+      res.status(400).json({ error: error.message });
   }
 };
 
@@ -174,8 +203,3 @@ exports.BestRating = async (req, res, next) => {
         res.status(500).json({ error: error.message });
     }
 };
-
-
-
-
-

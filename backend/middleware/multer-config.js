@@ -12,6 +12,12 @@ const SUPPORTED_INPUT_MIMES = [
   'image/tiff'
 ];
 
+// Vérifie si le dossier 'uploads' existe, sinon crée-le
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Configuration de multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -34,14 +40,13 @@ const resizeAndConvertToWebP = async (req, res, next) => {
   }
 
   try {
-    const uploadsDir = path.join(__dirname, '..', 'uploads');
     const originalPath = path.join(uploadsDir, filename);
     const webpPath = originalPath.replace(/\.\w+$/, '.webp');
 
-    // 🔄 Lire le contenu du fichier en buffer
+    // Lire le contenu du fichier en buffer
     const inputBuffer = await fs.promises.readFile(originalPath);
 
-    // 🔧 Traitement de l'image depuis le buffer (plus de verrou sur le fichier)
+    // Traitement de l'image depuis le buffer
     await sharp(inputBuffer)
       .resize({ width: 800, height: 800, fit: 'inside' })
       .webp({ quality: 80 })
@@ -49,11 +54,11 @@ const resizeAndConvertToWebP = async (req, res, next) => {
 
     console.log('✅ Image convertie en WebP :', webpPath);
 
-    // 🧹 Supprimer l’original
+    // Supprimer l'original
     await fs.promises.unlink(originalPath);
     console.log('🗑️ Image originale supprimée');
 
-    // Mettre à jour req.file
+    // Mettre à jour req.file avec le nouveau chemin et nom
     req.file.filename = path.basename(webpPath);
     req.file.path = webpPath;
 
@@ -65,4 +70,3 @@ const resizeAndConvertToWebP = async (req, res, next) => {
 };
 
 module.exports = { upload, resizeAndConvertToWebP };
-
