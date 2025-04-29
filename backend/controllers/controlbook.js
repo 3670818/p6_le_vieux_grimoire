@@ -3,14 +3,6 @@ const {booktest }= require('../models/booktest');
 const fs = require('fs');
 const path = require('path');
 
-// // Delete a book
-// exports.deleteBook = (req, res, next) => {
-//     Book.deleteOne({ _id: req.params.id })
-//         .then(() => res.status(200).json({ message: 'Book deleted!' }))
-//         .catch(error => res.status(400).json({ error }));
-// };
-
-
 
 exports.deleteBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
@@ -19,7 +11,7 @@ exports.deleteBook = (req, res, next) => {
                 return res.status(404).json({ message: 'Book not found' });
             }
 
-            // 🛡 Vérification de l'autorisation
+            //  Vérification de l'autorisation
             if (book.userId !== req.user.userId) {
                 return res.status(403).json({ message: 'Unauthorized to delete this book' });
             }

@@ -3,7 +3,6 @@ const userrouter = express.Router();
 const controluser = require('../controllers/controluser'); // Import des fonctions
 
 
-// const jwt = require("jsonwebtoken");
 
 
 userrouter.post("/signup", controluser.signup);
